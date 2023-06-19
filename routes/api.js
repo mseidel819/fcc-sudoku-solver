@@ -1,6 +1,6 @@
 "use strict";
 
-const { parse } = require("dotenv");
+// const { parse } = require("dotenv");
 const SudokuSolver = require("../controllers/sudoku-solver.js");
 
 module.exports = function (app) {
@@ -81,7 +81,18 @@ module.exports = function (app) {
 
   app.route("/api/solve").post((req, res) => {
     const solved = solver.solve(req.body.puzzle);
-    // console.log(req.body.puzzle);
-    // console.log(solved);
+    if (!req.body.puzzle) {
+      return res.json({ error: "Required field missing" });
+    }
+
+    if (solver.validate(req.body.puzzle).error) {
+      return res.json(solver.validate(req.body.puzzle));
+    }
+
+    if (!solved) {
+      return res.json({ error: "Puzzle cannot be solved" });
+    }
+
+    res.json({ solution: solved });
   });
 };

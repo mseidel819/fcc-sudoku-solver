@@ -63,9 +63,6 @@ class SudokuSolver {
       regionValues.push(...puzzleString.slice(rowStart, rowEnd));
     }
 
-    console.log(regionValues, value);
-    console.log(value === +regionValues[(row % 3) * 3 + ((column - 1) % 3)]);
-
     if (value === +regionValues[(row % 3) * 3 + ((column - 1) % 3)]) {
       return true;
     }
@@ -74,41 +71,37 @@ class SudokuSolver {
   }
 
   solve(puzzleString) {
-    //solve the puzzle
-    const puzzle = puzzleString.split("");
-    const solution = puzzleString.split("");
-    const emptyCells = [];
-    for (let i = 0; i < puzzle.length; i++) {
-      if (puzzle[i] === ".") {
-        emptyCells.push(i);
-      }
+    if (!puzzleString) {
+      return false;
     }
-    let index = 0;
-    while (index < emptyCells.length) {
-      const cell = emptyCells[index];
-      const row = Math.floor(cell / 9);
-      const column = cell % 9;
-      const value = solution[cell] === "." ? 1 : parseInt(solution[cell]) + 1;
-      let found = false;
-      while (!found && value < 10) {
-        if (
-          this.checkRowPlacement(puzzleString, row, column, value) &&
-          this.checkColPlacement(puzzleString, row, column, value) &&
-          this.checkRegionPlacement(puzzleString, row, column, value)
-        ) {
-          solution[cell] = value;
-          found = true;
-          index++;
-        } else {
-          value++;
+    const puzzleArray = puzzleString.split("");
+    const emptyIndex = puzzleArray.indexOf(".");
+    // console.log(emptyIndex);
+    if (emptyIndex === -1) {
+      return puzzleArray.join("");
+    }
+
+    for (let i = 1; i < 10; i++) {
+      const row = Math.floor(emptyIndex / 9);
+      const col = emptyIndex % 9;
+      const regionRow = Math.floor(row / 3);
+      const regionCol = Math.floor(col / 3);
+      const value = i.toString();
+
+      if (
+        this.checkRowPlacement(puzzleString, row, col + 1, value) &&
+        this.checkColPlacement(puzzleString, row, col + 1, value) &&
+        this.checkRegionPlacement(puzzleString, row, col + 1, value)
+      ) {
+        puzzleArray[emptyIndex] = value;
+        const solved = this.solve(puzzleArray.join(""));
+        if (solved) {
+          return solved;
         }
       }
-      if (!found) {
-        solution[cell] = ".";
-        index--;
-      }
     }
-    return solution.join("");
+    puzzleArray[emptyIndex] = ".";
+    return false;
   }
 }
 
